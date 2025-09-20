@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Симуляция эксперимента: Выявление витамина C</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            min-height: 100vh;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            border-radius: 10px;
+            color: white;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .simulation-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .experiment-setup {
+            flex: 1;
+            min-width: 300px;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .samples {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .sample {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+        }
+        
+        .sample:hover {
+            transform: scale(1.05);
+        }
+        
+        .sample.selected {
+            border-color: #1a2a6c;
+            background-color: #f0f5ff;
+        }
+        
+        .sample-icon {
+            width: 80px;
+            height: 80px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-tube-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .test-tube {
+            width: 100px;
+            height: 180px;
+            background: linear-gradient(to bottom, #a0d2ff 0%, #a0d2ff 30%, #ffffff 30%, #ffffff 100%);
+            border-radius: 10px 10px 0 0;
+            position: relative;
+            border: 2px solid #1a2a6c;
+            transition: all 0.5s ease;
+        }
+        
+        .liquid-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #4c8bf5;
+            border-radius: 8px 8px 0 0;
+            transition: height 0.5s ease;
+            height: 0%;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .control-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .add-drop-btn {
+            background: #1a2a6c;
+            color: white;
+        }
+        
+        .add-drop-btn:hover {
+            background: #2a3a8c;
+        }
+        
+        .reset-btn {
+            background: #b21f1f;
+            color: white;
+        }
+        
+        .reset-btn:hover {
+            background: #c22f2f;
+        }
+        
+        .next-sample-btn {
+            background: #fdbb2d;
+            color: #333;
+        }
+        
+        .next-sample-btn:hover {
+            background: #ffcc55;
+        }
+        
+        .results-area {
+            flex: 1;
+            min-width: 300px;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .counter {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .drops-count {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #1a2a6c;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #1a2a6c;
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .conclusion {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #e7f3ff;
+            border-left: 4px solid #1a2a6c;
+        }
+        
+        .instructions {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+        
+        .instructions h2 {
+            color: #1a2a6c;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #fdbb2d;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .instructions p {
+            line-height: 1.6;
+        }
+        
+        /* Адаптивные стили */
+        @media (max-width: 768px) {
+            .simulation-area {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .samples {
+                justify-content: center;
+            }
+            
+            .sample-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+            
+            .test-tube {
+                width: 80px;
+                height: 150px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .container {
+                padding: 1rem;
+                margin: 1rem;
+            }
+            
+            header {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .experiment-setup, .results-area {
+                padding: 15px;
+            }
+            
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Симуляция эксперимента: Выявление витамина C</h1>
+            <p class="subtitle">Интерактивная лабораторная работа по определению содержания витамина C в различных образцах</p>
+        </header>
+        
+        <div class="simulation-area">
+            <div class="experiment-setup">
+                <h2>Проведение эксперимента</h2>
+                
+                <div class="samples">
+                    <div class="sample" data-sample="control">
+                        <div class="sample-icon" style="color: #1a2a6c;">
+                            <i class="fas fa-vial"></i>
+                        </div>
+                        <span>Контроль</span>
+                    </div>
+                    
+                    <div class="sample" data-sample="orange">
+                        <div class="sample-icon" style="color: #ff8c00;">
+                            <i class="fas fa-orange"></i>
+                        </div>
+                        <span>Апельсин</span>
+                    </div>
+                    
+                    <div class="sample" data-sample="lemon">
+                        <div class="sample-icon" style="color: #ffd700;">
+                            <i class="fas fa-lemon"></i>
+                        </div>
+                        <span>Лимон</span>
+                    </div>
+                    
+                    <div class="sample" data-sample="kiwi">
+                        <div class="sample-icon" style="color: #9acd32;">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <span>Киви</span>
+                    </div>
+                </div>
+                
+                <div class="test-tube-container">
+                    <div class="test-tube">
+                        <div class="liquid-fill"></div>
+                    </div>
+                    <p>Пробирка с образцом</p>
+                </div>
+                
+                <div class="controls">
+                    <button class="control-btn add-drop-btn">
+                        <i class="fas fa-tint"></i> Добавить каплю йода
+                    </button>
+                    
+                    <button class="control-btn next-sample-btn">
+                        <i class="fas fa-arrow-right"></i> Следующий образец
+                    </button>
+                    
+                    <button class="control-btn reset-btn">
+                        <i class="fas fa-redo"></i> Сбросить эксперимент
+                    </button>
+                </div>
+            </div>
+            
+            <div class="results-area">
+                <h2>Результаты эксперимента</h2>
+                <div class="counter">
+                    <p>Количество капель йода:</p>
+                    <p class="drops-count" id="drops-count">0</p>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Образец</th>
+                            <th>Капель йода</th>
+                            <th>Содержание витамина C</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-table">
+                        <!-- Results will be added here dynamically -->
+                    </tbody>
+                </table>
+                
+                <div class="conclusion" id="conclusion">
+                    <p>Проведите эксперимент, чтобы увидеть результаты сравнения.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h2>Методика эксперимента</h2>
+            <ol>
+                <li>Выберите образец для тестирования (сок или контрольный раствор)</li>
+                <li>Добавьте крахмальный клейстер в качестве индикатора</li>
+                <li>Добавляйте по капле йода, пока раствор не изменит цвет</li>
+                <li>Система автоматически подсчитает количество капель йода</li>
+                <li>Чем больше капель потребовалось, тем выше содержание витамина С в образце</li>
+                <li>Проверьте разные образцы и сравните результаты в таблице</li>
+            </ol>
+            <p>Витамин C (аскорбиновая кислота) восстанавливает йод до йодида. Когда весь витамин C в растворе прореагирует, следующая капля йода прореагирует с крахмалом, образуя синее соединение, что сигнализирует о конце титрования.</p>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const samples = document.querySelectorAll('.sample');
+        const addDropBtn = document.querySelector('.add-drop-btn');
+        const nextSampleBtn = document.querySelector('.next-sample-btn');
+        const resetBtn = document.querySelector('.reset-btn');
+        const liquidFill = document.querySelector('.liquid-fill');
+        const dropsCount = document.getElementById('drops-count');
+        const resultsTable = document.getElementById('results-table');
+        const conclusion = document.getElementById('conclusion');
+        
+        let currentDrops = 0;
+        let currentSample = null;
+        let results = {
+            'control': {drops: 0, completed: false},
+            'orange': {drops: 0, completed: false},
+            'lemon': {drops: 0, completed: false},
+            'kiwi': {drops: 0, completed: false}
+        };
+        
+        // Максимальное количество капель для каждого образца
+        const maxDrops = {
+            'control': 5,
+            'orange': 8,
+            'lemon': 12,
+            'kiwi': 10
+        };
+        
+        // Выбор образца
+        samples.forEach(sample => {
+            sample.addEventListener('click', function() {
+                if (currentSample && !results[currentSample].completed) {
+                    alert('Завершите текущий эксперимент перед выбором нового образца!');
+                    return;
+                }
+                
+                samples.forEach(s => s.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                currentSample = this.dataset.sample;
+                currentDrops = 0;
+                dropsCount.textContent = '0';
+                liquidFill.style.height = '0%';
+                liquidFill.style.backgroundColor = '#4c8bf5';
+                
+                addDropBtn.disabled = false;
+                updateConclusion();
+            });
+        });
+        
+        // Добавление капли йода
+        addDropBtn.addEventListener('click', function() {
+            if (!currentSample) {
+                alert('Сначала выберите образец для тестирования!');
+                return;
+            }
+            
+            currentDrops++;
+            dropsCount.textContent = currentDrops;
+            
+            // Обновляем заполнение пробирки
+            const fillPercentage = Math.min((currentDrops / maxDrops[currentSample]) * 100, 100);
+            liquidFill.style.height = fillPercentage + '%';
+            
+            // Меняем цвет при приближении к конечной точке
+            if (currentDrops >= maxDrops[currentSample] - 2) {
+                liquidFill.style.backgroundColor = '#6a5acd'; // Фиолетовый
+            }
+            
+            // Завершение эксперимента для этого образца
+            if (currentDrops >= maxDrops[currentSample]) {
+                results[currentSample].drops = currentDrops;
+                results[currentSample].completed = true;
+                liquidFill.style.backgroundColor = '#4b0082'; // Темно-фиолетовый
+                
+                addDropBtn.disabled = true;
+                updateResultsTable();
+                updateConclusion();
+                
+                // Автоматический переход к следующему образцу, если есть незавершенные
+                const nextSample = findNextIncompleteSample();
+                if (nextSample) {
+                    setTimeout(() => {
+                        document.querySelector(`.sample[data-sample="${nextSample}"]`).click();
+                    }, 1500);
+                }
+            }
+        });
+        
+        // Следующий образец
+        nextSampleBtn.addEventListener('click', function() {
+            if (!currentSample) {
+                alert('Сначала выберите образец для тестирования!');
+                return;
+            }
+            
+            if (!results[currentSample].completed) {
+                alert('Завершите эксперимент для текущего образца перед переходом к следующему!');
+                return;
+            }
+            
+            const nextSample = findNextIncompleteSample();
+            if (nextSample) {
+                document.querySelector(`.sample[data-sample="${nextSample}"]`).click();
+            } else {
+                alert('Все образцы уже протестированы!');
+            }
+        });
+        
+        // Сброс эксперимента
+        resetBtn.addEventListener('click', function() {
+            if (confirm('Вы уверены, что хотите сбросить все результаты эксперимента?')) {
+                currentDrops = 0;
+                currentSample = null;
+                dropsCount.textContent = '0';
+                liquidFill.style.height = '0%';
+                liquidFill.style.backgroundColor = '#4c8bf5';
+                
+                samples.forEach(s => s.classList.remove('selected'));
+                
+                // Сброс результатов
+                for (const sample in results) {
+                    results[sample].drops = 0;
+                    results[sample].completed = false;
+                }
+                
+                updateResultsTable();
+                updateConclusion();
+                
+                addDropBtn.disabled = false;
+            }
+        });
+        
+        // Поиск следующего незавершенного образца
+        function findNextIncompleteSample() {
+            for (const sample in results) {
+                if (!results[sample].completed) {
+                    return sample;
+                }
+            }
+            return null;
+        }
+        
+        // Обновление таблицы результатов
+        function updateResultsTable() {
+            resultsTable.innerHTML = '';
+            
+            for (const sample in results) {
+                const row = document.createElement('tr');
+                
+                const sampleNameCell = document.createElement('td');
+                sampleNameCell.textContent = getSampleName(sample);
+                
+                const dropsCell = document.createElement('td');
+                dropsCell.textContent = results[sample].completed ? results[sample].drops : '-';
+                
+                const vitaminCell = document.createElement('td');
+                if (results[sample].completed) {
+                    vitaminCell.textContent = getVitaminContentDescription(sample, results[sample].drops);
+                } else {
+                    vitaminCell.textContent = 'Не тестировалось';
+                }
+                
+                row.appendChild(sampleNameCell);
+                row.appendChild(dropsCell);
+                row.appendChild(vitaminCell);
+                
+                resultsTable.appendChild(row);
+            }
+        }
+        
+        // Обновление выводов
+        function updateConclusion() {
+            const completedSamples = Object.values(results).filter(r => r.completed).length;
+            
+            if (completedSamples === 0) {
+                conclusion.innerHTML = '<p>Проведите эксперимент, чтобы увидеть результаты сравнения.</p>';
+            } else if (completedSamples < 4) {
+                conclusion.innerHTML = `<p>Проведено тестов: ${completedSamples} из 4. Продолжайте эксперимент!</p>`;
+            } else {
+                // Все образцы протестированы
+                let maxDropsSample = '';
+                let maxDrops = 0;
+                
+                for (const sample in results) {
+                    if (results[sample].drops > maxDrops) {
+                        maxDrops = results[sample].drops;
+                        maxDropsSample = sample;
+                    }
+                }
+                
+                conclusion.innerHTML = `
+                    <p>Эксперимент завершен! Наибольшее содержание витамина C в <strong>${getSampleName(maxDropsSample)}</strong> (потребовалось ${maxDrops} капель йода).</p>
+                    <p>Витамин C (аскорбиновая кислота) является антиоксидантом и восстанавливает йод. Чем больше йода требуется для изменения цвета, тем больше витамина C содержится в образце.</p>
+                `;
+            }
+        }
+        
+        // Получение читаемого имени образца
+        function getSampleName(sample) {
+            const names = {
+                'control': 'Контрольный раствор',
+                'orange': 'Апельсиновый сок',
+                'lemon': 'Лимонный сок',
+                'kiwi': 'Сок киви'
+            };
+            return names[sample];
+        }
+        
+        // Описание содержания витамина C
+        function getVitaminContentDescription(sample, drops) {
+            if (sample === 'control') {
+                return 'Низкое (контроль)';
+            }
+            
+            const percentage = (drops / maxDrops.lemon) * 100;
+            
+            if (percentage >= 90) {
+                return 'Очень высокое';
+            } else if (percentage >= 70) {
+                return 'Высокое';
+            } else if (percentage >= 50) {
+                return 'Среднее';
+            } else {
+                return 'Низкое';
+            }
+        }
+        
+        // Инициализация таблицы результатов
+        updateResultsTable();
+    });
+    </script>
+</body>
+</html>

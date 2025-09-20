@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторные эксперименты STEM BOX</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            min-height: 100vh;
+            padding: 0;
+        }
+        
+        /* Верхний заголовок */
+        #top-header {
+            background-color: #1f1815;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3');
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .main-title {
+            font-size: 3.5rem;
+            color: #f0f5ff;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .sub-title {
+            font-size: 1.8rem;
+            color: #f5f5f5;
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+        
+        .authors {
+            font-size: 1.4rem;
+            color: #d3d3d3;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            border-radius: 10px;
+            color: white;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .experiment-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .experiment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .experiment-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .card-content {
+            padding: 20px;
+        }
+        
+        .card-content h3 {
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+            color: #1a2a6c;
+        }
+        
+        .card-content p {
+            font-size: 0.95rem;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        
+        .play-button {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .play-button:hover {
+            background: linear-gradient(135deg, #b21f1f, #1a2a6c);
+            transform: scale(1.05);
+        }
+        
+        .play-button.disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .play-button.disabled:hover {
+            background: #cccccc;
+            transform: none;
+        }
+        
+        .detail-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 90%;
+            max-width: 1000px;
+            max-height: 90vh;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            overflow: hidden;
+            transition: transform 0.4s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-panel.active {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .panel-header {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+        
+        .panel-header h2 {
+            font-size: 1.5rem;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close-btn:hover {
+            color: #fdbb2d;
+        }
+        
+        .panel-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .panel-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .panel-content h3 {
+            color: #1a2a6c;
+            margin: 15px 0 10px;
+            font-size: 1.3rem;
+        }
+        
+        .panel-content p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .panel-content ul, .panel-content ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .panel-content li {
+            margin-bottom: 8px;
+        }
+        
+        .video-container {
+            width: 40%;
+            background: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .video-placeholder {
+            width: 100%;
+            height: 250px;
+            background: #ddd;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #666;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .video-placeholder i {
+            font-size: 3rem;
+            color: #b21f1f;
+            margin-right: 10px;
+        }
+        
+        .video-description {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s;
+            z-index: 99;
+        }
+        
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .experiment-meta {
+            display: flex;
+            gap: 15px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .meta-item {
+            background: #f0f5ff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .meta-item i {
+            color: #b21f1f;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f0f5ff;
+        }
+        
+        /* Модальное окно для сообщений */
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 101;
+            text-align: center;
+            transition: transform 0.4s ease;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .modal.active {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .modal h3 {
+            color: #1a2a6c;
+            margin-bottom: 15px;
+        }
+        
+        .modal p {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .modal-btn {
+            background: #1a2a6c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+        
+        .modal-btn:hover {
+            background: #2a3a8c;
+        }
+        
+        /* Адаптивные стили */
+        @media (max-width: 1200px) {
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .main-title {
+                font-size: 2.8rem;
+            }
+            
+            .sub-title {
+                font-size: 1.5rem;
+            }
+            
+            .authors {
+                font-size: 1.2rem;
+            }
+            
+            .panel-body {
+                flex-direction: column;
+            }
+            
+            .video-container {
+                width: 100%;
+                order: -1;
+                padding: 15px;
+            }
+            
+            .video-placeholder {
+                height: 200px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            #top-header {
+                padding: 1.5rem;
+            }
+            
+            .main-title {
+                font-size: 2.2rem;
+            }
+            
+            .sub-title {
+                font-size: 1.3rem;
+            }
+            
+            .authors {
+                font-size: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .gallery {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .experiment-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .panel-content {
+                padding: 15px;
+            }
+            
+            .panel-header {
+                padding: 12px 15px;
+            }
+            
+            .panel-header h2 {
+                font-size: 1.3rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            #top-header {
+                padding: 1rem;
+            }
+            
+            .main-title {
+                font-size: 1.8rem;
+            }
+            
+            .sub-title {
+                font-size: 1.1rem;
+            }
+            
+            .authors {
+                font-size: 0.9rem;
+            }
+            
+            .container {
+                padding: 1rem;
+                margin: 1rem auto;
+            }
+            
+            .page-header {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .card-content {
+                padding: 15px;
+            }
+            
+            .card-content h3 {
+                font-size: 1.2rem;
+            }
+            
+            .detail-panel {
+                width: 95%;
+            }
+            
+            .meta-item {
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+            
+            .play-button {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Start of OpenWidget (www.openwidget.com) code -->
+    <script>
+      window.__ow = window.__ow || {};
+      window.__ow.organizationId = "e594a349-9728-42f3-8559-23adb5142bcd";
+      window.__ow.integration_name = "manual_settings";
+      window.__ow.product_name = "openwidget";   
+      ;(function(n,t,c){function i(n){return e._h?e._h.apply(null,n):e._q.push(n)}var e={_q:[],_h:null,_v:"2.0",on:function(){i(["on",c.call(arguments)])},once:function(){i(["once",c.call(arguments)])},off:function(){i(["off",c.call(arguments)])},get:function(){if(!e._h)throw new Error("[OpenWidget] You can't use getters before load.");return i(["get",c.call(arguments)])},call:function(){i(["call",c.call(arguments)])},init:function(){var n=t.createElement("script");n.async=!0,n.type="text/javascript",n.src="https://cdn.openwidget.com/openwidget.js",t.head.appendChild(n)}};!n.__ow.asyncInit&&e.init(),n.OpenWidget=n.OpenWidget||e}(window,document,[].slice))
+    </script>
+    <noscript>You need to <a href="https://www.openwidget.com/enable-javascript" rel="noopener nofollow">enable JavaScript</a> to use the communication tool powered by <a href="https://www.openwidget.com/" rel="noopener nofollow" target="_blank">OpenWidget</a></noscript>
+    <!-- End of OpenWidget code -->
+
+    <!-- Верхний заголовок -->
+    <header id="top-header">
+        <div class="header-content">
+            <h1 class="main-title"><strong>STEM BOX</strong></h1>
+            <p class="sub-title">Explore the world of science with us!<br>Создание моделей, проведение опытов и многое другое...</p>
+            <p class="authors">Created by Altay Amirali and Kassiyet Zhumabek</p>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <div class="container">
+        <div class="page-header">
+            <h1>Лабораторные эксперименты</h1>
+            <p class="subtitle">Исследуйте увлекательный мир научных экспериментов</p>
+        </div>
+        
+        <div class="gallery">
+            <!-- Карточка 1 с кнопкой играть -->
+            <div class="experiment-card" data-experiment="1">
+                <img src="https://images.unsplash.com/photo-1619566636858-adf3ef46400b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Выявление витамина С">
+                <div class="card-content">
+                    <h3>Выявление витамина С во фруктах</h3>
+                    <p>Сравнение количества витамина С в свежевыжатых соках различных фруктов с помощью титрования.</p>
+                    <button class="play-button" data-experiment="1">
+                        <i class="fas fa-play"></i> Играть
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Карточка 2 с неактивной кнопкой -->
+            <div class="experiment-card" data-experiment="2">
+                <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Изучение индикаторов">
+                <div class="card-content">
+                    <h3>Изучение индикаторов</h3>
+                    <p>Использование химических индикаторов для выявления крахмала, глюкозы, липидов и белков.</p>
+                    <button class="play-button disabled" data-experiment="2">
+                        <i class="fas fa-play"></i> Играть
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Карточка 3 с неактивной кнопкой -->
+            <div class="experiment-card" data-experiment="3">
+                <img src="https://images.unsplash.com/photo-1589923188937-cb64779f4abe?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Фотосинтетические пигменты">
+                <div class="card-content">
+                    <h3>Фотосинтетические пигменты</h3>
+                    <p>Извлечение и разделение пигментов из растений методом бумажной хроматографии.</p>
+                    <button class="play-button disabled" data-experiment="3">
+                        <i class="fas fa-play"></i> Играть
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Карточка 4 с неактивной кнопкой -->
+            <div class="experiment-card" data-experiment="4">
+                <img src="https://images.unsplash.com/photo-1582719471384-894fbb16e074?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Биологические модели">
+                <div class="card-content">
+                    <h3>Биологические модели</h3>
+                    <p>Создание моделей биологических объектов и процессов из подручных материалов.</p>
+                    <button class="play-button disabled" data-experiment="4">
+                        <i class="fas fa-play"></i> Играть
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Карточка 5 с неактивной кнопкой -->
+            <div class="experiment-card" data-experiment="5">
+                <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Анатомические модели">
+                <div class="card-content">
+                    <h3>Анатомические модели</h3>
+                    <p>Конструирование моделей систем организма человека с демонстрацией движения жидкостей.</p>
+                    <button class="play-button disabled" data-experiment="5">
+                        <i class="fas fa-play"></i> Играть
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Карточка 6 с неактивной кнопкой -->
+            <div class="experiment-card" data-experiment="6">
+                <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Модель вулкана">
+                <div class="card-content">
+                    <h3>Модель вулкана</h3>
+                    <p>Создание модели вулкана и имитация извержения с помощью химической реакции.</p>
+                    <button class="play-button disabled" data-experiment="6">
+                        <i class="fas fa-play"></i> Играть
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Карточка 7 с неактивной кнопкой -->
+            <div class="experiment-card" data-experiment="7">
+                <img src="https://images.unsplash.com/photo-1586773860418-d37222d8fce3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Картофельная батарейка">
+                <div class="card-content">
+                    <h3>Картофельная батарейка</h3>
+                    <p>Создание гальванического элемента из картофеля для демонстрации получения электричества.</p>
+                    <button class="play-button disabled" data-experiment="7">
+                        <i class="fas fa-play"></i> Играть
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Карточка 8 с неактивной кнопкой -->
+            <div class="experiment-card" data-experiment="8">
+                <img src="https://images.unsplash.com/photo-1596040033221-a1b4e13c6f42?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Лавовая лампа">
+                <div class="card-content">
+                    <h3>Лавовая лампа</h3>
+                    <p>Создание модели лавовой лампы для наблюдения физических и химических явлений.</p>
+                    <button class="play-button disabled" data-experiment="8">
+                        <i class="fas fa-play"></i> Играть
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Карточка 9 с неактивной кнопкой -->
+            <div class="experiment-card" data-experiment="9">
+                <img src="https://images.unsplash.com/photo-1574086954920-6f3a256d973d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Опыт Светофор">
+                <div class="card-content">
+                    <h3>Опыт "Светофор"</h3>
+                    <p>Демонстрация окислительно-восстановительных процессов с изменением цвета раствора.</p>
+                    <button class="play-button disabled" data-experiment="9">
+                        <i class="fas fa-play"></i> Играть
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Карточка 10 с неактивной кнопкой -->
+            <div class="experiment-card" data-experiment="10">
+                <img src="https://images.unsplash.com/photo-1603126857595-887f2b2a1c3c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Фараоновы змеи">
+                <div class="card-content">
+                    <h3>Фараоновы змеи</h3>
+                    <p>Демонстрация термильного разложения с образованием пористого твёрдого вещества.</p>
+                    <button class="play-button disabled" data-experiment="10">
+                        <i class="fas fa-play"></i> Играть
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Детальная панель для экспериментов -->
+    <div class="detail-panel">
+        <div class="panel-header">
+            <h2 id="panel-title">Название эксперимента</h2>
+            <button class="close-btn">&times;</button>
+        </div>
+        <div class="panel-body">
+            <div class="panel-content">
+                <div class="experiment-meta">
+                    <div class="meta-item"><i class="fas fa-flask"></i> Химия</div>
+                    <div class="meta-item"><i class="fas fa-clock"></i> 45 минут</div>
+                    <div class="meta-item"><i class="fas fa-user-graduate"></i> Средняя сложность</div>
+                </div>
+                
+                <h3>Цель работы</h3>
+                <p id="goal-text">Цель эксперимента будет отображена здесь.</p>
+                
+                <h3>Оборудование и материалы</h3>
+                <div id="materials-list">
+                    <!-- Содержимое будет добавлено через JavaScript -->
+                </div>
+                
+                <h3>Ход работы</h3>
+                <div id="procedure-steps">
+                    <!-- Содержимое будет добавлено через JavaScript -->
+                </div>
+                
+                <h3>Результаты</h3>
+                <div id="results-content">
+                    <!-- Содержимое будет добавлено через JavaScript -->
+                </div>
+            </div>
+            
+            <div class="video-container">
+                <div class="video-placeholder">
+                    <i class="fas fa-video"></i>
+                    <span>Видео эксперимента</span>
+                </div>
+                <p class="video-description">Видео демонстрирует процесс проведения эксперимента и ожидаемые результаты</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно для сообщений -->
+    <div class="modal" id="message-modal">
+        <h3 id="modal-title">В разработке</h3>
+        <p id="modal-message">Данная симуляция находится в разработке и будет доступна в ближайшее время.</p>
+        <button class="modal-btn" id="modal-close">Понятно</button>
+    </div>
+    
+    <div class="overlay"></div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const experimentCards = document.querySelectorAll('.experiment-card');
+        const playButtons = document.querySelectorAll('.play-button');
+        const detailPanel = document.querySelector('.detail-panel');
+        const overlay = document.querySelector('.overlay');
+        const closeBtn = document.querySelector('.close-btn');
+        const panelTitle = document.getElementById('panel-title');
+        const goalText = document.getElementById('goal-text');
+        const materialsList = document.getElementById('materials-list');
+        const procedureSteps = document.getElementById('procedure-steps');
+        const resultsContent = document.getElementById('results-content');
+        const videoContainer = document.querySelector('.video-container');
+        const messageModal = document.getElementById('message-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalClose = document.getElementById('modal-close');
+        
+        // Данные для экспериментов
+        const experimentData = {
+            1: {
+                title: "Выявление витамина С во фруктах",
+                goal: "Сравнить количество витамина С в свежевыжатом соке фруктов.",
+                materials: [
+                    "Крахмальный клейстер",
+                    "Аскорбиновая кислота",
+                    "Вода",
+                    "Лимонный сок, яблочный сок, апельсиновый сок, мандариновый сок",
+                    "Йод",
+                    "Лабораторная посуда"
+                ],
+                procedure: [
+                    "Подготовка контроля: Налейте 20 мл воды в стакан, добавите 1 мг аскорбиновой кислоты.",
+                    "Добавьте 1 каплю крахмального клейстера и перемешайте.",
+                    "Добавляйте по одной капле йода в раствор, считая капли (титрование).",
+                    "Проверка образцов: Возьмите 20 мл одного из видов сока.",
+                    "Добавьте 1 каплю крахмального клейстера и перемешайте.",
+                    "Добавляйте йод по 1 капле, считая каждую каплю.",
+                    "Запишите результаты в таблицу."
+                ],
+                results: "Результаты эксперимента заносятся в таблицу, где сравнивается количество капель йода, необходимое для изменения цвета в разных соках.",
+                image: "images/vitaminC(1).png",
+                hasSimulation: true,
+                simulationPath: "simulations/vitamin-c-simulation.html" // Путь к симуляции
+            },
+            2: {
+                title: "Изучение индикаторов",
+                goal: "Использование химических индикаторов для выявления крахмала, глюкозы, липидов и белков.",
+                materials: [
+                    "Подставка для пробирок / Пробирки",
+                    "Щипцы",
+                    "Индикаторы: Йод (Люголя), Биурет, Бенедикта, Судан IV",
+                    "Содержимое желудка (образец для анализа)"
+                ],
+                procedure: [
+                    "Йод Люголя (на крахмал): Поместите 10 капель образца в лунку, добавьте 2 капли йода.",
+                    "Раствор Биурета (на белки): Поместите 10 капель образца в лунку, добавьте 2 капли реактива Биурета, перемешайте.",
+                    "Раствор Бенедикта (на глюкозу): Добавьте 20 капель образца в пробирку, добавьте 5 капель раствора Бенедикта, осторожно перемешайте.",
+                    "Судан IV (на липиды): Добавьте 20 капель образца в пробирку, добавьте 5 капель Судана IV, осторожно перемешайте, оставьте пробирку на 2 минуты."
+                ],
+                results: "На основе изменения цвета индикаторов определяется наличие определенных веществ в образце.",
+                image: "images/indicator(2).png",
+                hasSimulation: false
+            },
+            // Остальные эксперименты...
+        };
+        
+        // Обработка кликов по кнопкам "Играть"
+        playButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation(); // Предотвращаем всплытие события
+                
+                const experimentId = this.getAttribute('data-experiment');
+                const data = experimentData[experimentId];
+                
+                if (data.hasSimulation) {
+                    // Для эксперимента с витамином C - открываем симуляцию
+                    window.open(data.simulationPath, '_blank');
+                } else {
+                    // Для остальных экспериментов показываем сообщение
+                    modalTitle.textContent = "Симуляция в разработке";
+                    modalMessage.textContent = `Интерактивная симуляция эксперимента "${data.title}" находится в разработке и будет доступна в ближайшее время.`;
+                    messageModal.classList.add('active');
+                    overlay.classList.add('active');
+                }
+            });
+        });
+        
+        // Закрытие модального окна
+        modalClose.addEventListener('click', function() {
+            messageModal.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+        
+        // Открытие панели при клике на карточку
+        experimentCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const experimentId = card.getAttribute('data-experiment');
+                const data = experimentData[experimentId];
+                
+                if (data) {
+                    panelTitle.textContent = data.title;
+                    goalText.textContent = data.goal;
+                    
+                    // Заполняем материалы
+                    materialsList.innerHTML = "";
+                    data.materials.forEach(material => {
+                        const li = document.createElement('p');
+                        li.textContent = "• " + material;
+                        materialsList.appendChild(li);
+                    });
+                    
+                    // Заполняем процедуру
+                    procedureSteps.innerHTML = "";
+                    data.procedure.forEach((step, index) => {
+                        const li = document.createElement('p');
+                        li.innerHTML = `<b>${index + 1}.</b> ${step}`;
+                        procedureSteps.appendChild(li);
+                    });
+                    
+                    // Заполняем результаты
+                    resultsContent.textContent = data.results;
+                    
+                    // Добавляем изображение как заглушку для видео
+                    videoContainer.innerHTML = "";
+                    if (data.image) {
+                        const img = document.createElement('img');
+                        img.src = data.image;
+                        img.alt = data.title;
+                        img.style.width = '100%';
+                        img.style.borderRadius = '8px';
+                        videoContainer.appendChild(img);
+                        
+                        // Добавляем текст под изображением
+                        const caption = document.createElement('p');
+                        caption.textContent = 'Изображение эксперимента';
+                        caption.style.textAlign = 'center';
+                        caption.style.marginTop = '10px';
+                        caption.style.color = '#666';
+                        videoContainer.appendChild(caption);
+                    }
+                    
+                    // Показываем панель
+                    detailPanel.classList.add('active');
+                    overlay.classList.add('active');
+                }
+            });
+        });
+        
+        // Закрытие панели
+        closeBtn.addEventListener('click', closePanel);
+        overlay.addEventListener('click', closePanel);
+        
+        function closePanel() {
+            detailPanel.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+        
+        // Закрытие панели клавишей Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (detailPanel.classList.contains('active')) {
+                    closePanel();
+                }
+                if (messageModal.classList.contains('active')) {
+                    messageModal.classList.remove('active');
+                    overlay.classList.remove('active');
+                }
+            }
+        });
+    });
+    </script>
+</body>
+</html>

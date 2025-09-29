@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Симуляция: Лавовая лампа</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            border-radius: 10px;
+            color: white;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .experiment-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .simulation-container {
+            flex: 1;
+            min-width: 300px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .instructions {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .lava-lamp {
+            width: 150px;
+            height: 300px;
+            margin: 0 auto 30px;
+            position: relative;
+            background: linear-gradient(to bottom, #1a2a6c 0%, #b21f1f 50%, #fdbb2d 100%);
+            border-radius: 10px 10px 0 0;
+            border: 3px solid #333;
+            border-bottom: none;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .lamp-base {
+            width: 200px;
+            height: 30px;
+            background: #333;
+            border-radius: 10px;
+            margin: 0 auto;
+            position: relative;
+            top: -5px;
+            z-index: -1;
+        }
+        
+        .liquid {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            background: #1a2a6c;
+            transition: all 1s ease;
+        }
+        
+        .oil {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(to bottom, #ffd54f, #f57c00);
+            border-radius: 0 0 50% 50%;
+            transition: all 1s ease;
+        }
+        
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: #ffd54f;
+            opacity: 0;
+            transition: all 2s ease-in-out;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            background: linear-gradient(135deg, #b21f1f, #1a2a6c);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        button:disabled:hover {
+            background: #cccccc;
+            transform: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .chemicals {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .chemical {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: #ecf0f1;
+            width: 120px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+        }
+        
+        .chemical:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .chemical.active {
+            background-color: #d5edff;
+            border: 2px solid #3498db;
+        }
+        
+        .chemical.used {
+            background-color: #e0e0e0;
+            cursor: not-allowed;
+            opacity: 0.7;
+            transform: none;
+        }
+        
+        .chemical.used:hover {
+            transform: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chemical i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .step {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active {
+            background-color: #e1f5fe;
+            border-left: 4px solid #0288d1;
+            transform: translateX(5px);
+        }
+        
+        .step.completed {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .step.current {
+            background-color: #fff3e0;
+            border-left: 4px solid #ff9800;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { background-color: #fff3e0; }
+            50% { background-color: #ffe0b2; }
+            100% { background-color: #fff3e0; }
+        }
+        
+        .observation {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #e8f5e9;
+            border-radius: 10px;
+            border-left: 4px solid #4caf50;
+            display: none;
+        }
+        
+        .science-explanation {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e3f2fd;
+            border-radius: 10px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .status-message {
+            text-align: center;
+            padding: 10px;
+            margin: 10px 0;
+            background: #e3f2fd;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #1a2a6c;
+        }
+        
+        h2, h3 {
+            color: #1a2a6c;
+            margin-bottom: 15px;
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            border-bottom: 2px solid #1a2a6c;
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            font-size: 1.4rem;
+        }
+        
+        p, li {
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .experiment-area {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            button {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>Лавовая лампа</h1>
+            <p class="subtitle">Симуляция химического эксперимента</p>
+        </div>
+        
+        <div class="experiment-area">
+            <div class="simulation-container">
+                <h2>Экспериментальная установка</h2>
+                
+                <div class="status-message" id="statusMessage">
+                    Начните эксперимент, добавив воду в колбу
+                </div>
+                
+                <div class="lava-lamp">
+                    <div class="liquid" id="liquid">
+                        <div class="oil" id="oil"></div>
+                    </div>
+                </div>
+                <div class="lamp-base"></div>
+                
+                <div class="controls">
+                    <button id="resetBtn">
+                        <i class="fas fa-redo"></i> Начать заново
+                    </button>
+                    <button id="addTabletBtn" disabled>
+                        <i class="fas fa-tablets"></i> Добавить таблетку
+                    </button>
+                </div>
+                
+                <div class="chemicals">
+                    <div class="chemical" id="water" data-chemical="water">
+                        <i class="fas fa-tint" style="color: #1a2a6c;"></i>
+                        <div>Вода</div>
+                        <small>Нажмите чтобы добавить</small>
+                    </div>
+                    <div class="chemical" id="color" data-chemical="color">
+                        <i class="fas fa-palette" style="color: #e91e63;"></i>
+                        <div>Краситель</div>
+                        <small>Нажмите чтобы добавить</small>
+                    </div>
+                    <div class="chemical" id="oil-chemical" data-chemical="oil">
+                        <i class="fas fa-oil-can" style="color: #ff9800;"></i>
+                        <div>Масло</div>
+                        <small>Нажмите чтобы добавить</small>
+                    </div>
+                    <div class="chemical" id="tablet" data-chemical="tablet">
+                        <i class="fas fa-pills" style="color: #795548;"></i>
+                        <div>Таблетка</div>
+                        <small>Нажмите чтобы добавить</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <h2>Цель работы</h2>
+                <p>Смоделировать работу лавовой лампы и наблюдать взаимодействие веществ разной плотности.</p>
+                
+                <h2>Оборудование и материалы</h2>
+                <ul>
+                    <li>Прозрачная бутылка или стакан</li>
+                    <li>Вода</li>
+                    <li>Растительное масло</li>
+                    <li>Пищевой краситель</li>
+                    <li>Шипучая таблетка</li>
+                </ul>
+                
+                <h2>Ход работы</h2>
+                <div class="step current" id="step1">
+                    <strong>1.</strong> Наполните бутылку на 1/4 водой.
+                    <div style="margin-top: 8px; font-size: 0.9em; color: #666;">
+                        <i class="fas fa-mouse-pointer"></i> Нажмите на кнопку "Вода"
+                    </div>
+                </div>
+                <div class="step" id="step2">
+                    <strong>2.</strong> Добавьте пищевой краситель и перемешайте.
+                </div>
+                <div class="step" id="step3">
+                    <strong>3.</strong> Долейте растительное масло почти до верха.
+                </div>
+                <div class="step" id="step4">
+                    <strong>4.</strong> Бросьте кусочек шипучей таблетки и наблюдайте эффект.
+                </div>
+                
+                <div class="observation" id="observation">
+                    <h3>Результаты</h3>
+                    <p>Создание эффекта движущихся пузырьков, имитирующих лавовую лампу.</p>
+                </div>
+                
+                <div class="science-explanation">
+                    <h3>Научное объяснение</h3>
+                    <p>Эффект лавовой лампы создается благодаря разной плотности жидкостей. Масло легче воды и не смешивается с ней, образуя отдельный слой. При добавлении шипучей таблетки выделяется углекислый газ, который поднимается в виде пузырьков через масляный слой, увлекая за собой окрашенную воду и создавая эффект "лавы".</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const liquid = document.getElementById('liquid');
+            const oil = document.getElementById('oil');
+            const resetBtn = document.getElementById('resetBtn');
+            const addTabletBtn = document.getElementById('addTabletBtn');
+            const chemicals = document.querySelectorAll('.chemical');
+            const steps = document.querySelectorAll('.step');
+            const observation = document.getElementById('observation');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            let currentStep = 1;
+            let isActive = false;
+            let waterAdded = false;
+            let colorAdded = false;
+            let oilAdded = false;
+            
+            resetBtn.addEventListener('click', resetExperiment);
+            addTabletBtn.addEventListener('click', addTablet);
+            
+            chemicals.forEach(chem => {
+                chem.addEventListener('click', function() {
+                    if (this.classList.contains('used')) return;
+                    
+                    const chemicalType = this.getAttribute('data-chemical');
+                    addChemical(chemicalType);
+                });
+            });
+            
+            function resetExperiment() {
+                currentStep = 1;
+                isActive = false;
+                waterAdded = false;
+                colorAdded = false;
+                oilAdded = false;
+                
+                // Сброс внешнего вида лампы
+                liquid.style.height = '0%';
+                liquid.style.background = '#1a2a6c';
+                oil.style.height = '0%';
+                oil.style.opacity = '1';
+                
+                // Сброс кнопок
+                addTabletBtn.disabled = true;
+                
+                // Сброс шагов
+                steps.forEach((step, index) => {
+                    step.classList.remove('active', 'completed', 'current');
+                    if (index === 0) {
+                        step.classList.add('current');
+                    }
+                });
+                
+                // Скрыть наблюдения
+                observation.style.display = 'none';
+                
+                // Сброс химикатов
+                chemicals.forEach(chem => {
+                    chem.classList.remove('active', 'used');
+                });
+                
+                // Обновление статуса
+                statusMessage.textContent = 'Начните эксперимент, добавив воду в колбу';
+                statusMessage.style.background = '#e3f2fd';
+                statusMessage.style.color = '#1a2a6c';
+            }
+            
+            function addChemical(type) {
+                const chemicalElement = document.querySelector(`[data-chemical="${type}"]`);
+                
+                switch(type) {
+                    case 'water':
+                        if (!waterAdded) {
+                            waterAdded = true;
+                            chemicalElement.classList.add('used');
+                            steps[0].classList.remove('current');
+                            steps[0].classList.add('completed');
+                            steps[1].classList.add('current');
+                            
+                            liquid.style.height = '25%';
+                            statusMessage.textContent = 'Вода добавлена! Теперь добавьте краситель';
+                            statusMessage.style.background = '#e8f5e9';
+                            statusMessage.style.color = '#2e7d32';
+                        }
+                        break;
+                        
+                    case 'color':
+                        if (waterAdded && !colorAdded) {
+                            colorAdded = true;
+                            chemicalElement.classList.add('used');
+                            steps[1].classList.remove('current');
+                            steps[1].classList.add('completed');
+                            steps[2].classList.add('current');
+                            
+                            liquid.style.background = 'linear-gradient(to bottom, #e91e63, #ad1457)';
+                            statusMessage.textContent = 'Краситель добавлен! Теперь добавьте масло';
+                            statusMessage.style.background = '#fce4ec';
+                            statusMessage.style.color = '#ad1457';
+                        } else if (!waterAdded) {
+                            statusMessage.textContent = 'Сначала нужно добавить воду!';
+                            statusMessage.style.background = '#ffebee';
+                            statusMessage.style.color = '#c62828';
+                        }
+                        break;
+                        
+                    case 'oil':
+                        if (waterAdded && colorAdded && !oilAdded) {
+                            oilAdded = true;
+                            chemicalElement.classList.add('used');
+                            steps[2].classList.remove('current');
+                            steps[2].classList.add('completed');
+                            steps[3].classList.add('current');
+                            
+                            oil.style.height = '40%';
+                            liquid.style.height = '60%';
+                            statusMessage.textContent = 'Масло добавлено! Теперь можно добавить шипучую таблетку';
+                            statusMessage.style.background = '#fff3e0';
+                            statusMessage.style.color = '#ef6c00';
+                            
+                            // Активируем кнопку добавления таблетки
+                            addTabletBtn.disabled = false;
+                        } else if (!waterAdded) {
+                            statusMessage.textContent = 'Сначала нужно добавить воду!';
+                            statusMessage.style.background = '#ffebee';
+                            statusMessage.style.color = '#c62828';
+                        } else if (!colorAdded) {
+                            statusMessage.textContent = 'Сначала нужно добавить краситель!';
+                            statusMessage.style.background = '#ffebee';
+                            statusMessage.style.color = '#c62828';
+                        }
+                        break;
+                        
+                    case 'tablet':
+                        if (waterAdded && colorAdded && oilAdded) {
+                            addTablet();
+                        } else {
+                            statusMessage.textContent = 'Сначала добавьте все компоненты: вода, краситель, масло';
+                            statusMessage.style.background = '#ffebee';
+                            statusMessage.style.color = '#c62828';
+                        }
+                        break;
+                }
+            }
+            
+            function addTablet() {
+                if (!waterAdded || !colorAdded || !oilAdded) return;
+                
+                const tabletElement = document.querySelector('[data-chemical="tablet"]');
+                tabletElement.classList.add('used');
+                
+                steps[3].classList.remove('current');
+                steps[3].classList.add('completed');
+                observation.style.display = 'block';
+                
+                // Анимация пузырьков
+                createBubbles();
+                
+                // Изменение состояния лампы
+                oil.style.opacity = '0.8';
+                isActive = true;
+                
+                statusMessage.textContent = 'Таблетка добавлена! Наблюдайте эффект лавовой лампы';
+                statusMessage.style.background = '#e8f5e9';
+                statusMessage.style.color = '#2e7d32';
+            }
+            
+            function createBubbles() {
+                const lamp = document.querySelector('.lava-lamp');
+                
+                // Создаем несколько пузырьков
+                for (let i = 0; i < 15; i++) {
+                    setTimeout(() => {
+                        const bubble = document.createElement('div');
+                        bubble.className = 'bubble';
+                        
+                        // Случайный размер пузырька
+                        const size = Math.random() * 25 + 15;
+                        bubble.style.width = `${size}px`;
+                        bubble.style.height = `${size}px`;
+                        
+                        // Случайная позиция по горизонтали
+                        const left = Math.random() * 120;
+                        bubble.style.left = `${left}px`;
+                        
+                        // Начальная позиция внизу
+                        bubble.style.bottom = '0';
+                        
+                        // Случайный цвет пузырька
+                        const colors = ['#ffd54f', '#ff9800', '#e91e63', '#9c27b0', '#4caf50'];
+                        const color = colors[Math.floor(Math.random() * colors.length)];
+                        bubble.style.background = color;
+                        
+                        // Добавляем пузырек в лампу
+                        liquid.appendChild(bubble);
+                        
+                        // Анимация подъема пузырька
+                        setTimeout(() => {
+                            bubble.style.opacity = '0.9';
+                            bubble.style.transition = 'all 3s ease-in-out';
+                            bubble.style.bottom = '100%';
+                            bubble.style.transform = `translateX(${Math.random() * 30 - 15}px) scale(${0.5 + Math.random() * 0.5})`;
+                        }, 100);
+                        
+                        // Удаление пузырька после анимации
+                        setTimeout(() => {
+                            if (bubble.parentNode) {
+                                bubble.remove();
+                            }
+                        }, 4000);
+                    }, i * 400);
+                }
+                
+                // Продолжаем создавать пузырьки, пока лампа активна
+                if (isActive) {
+                    setTimeout(createBubbles, 5000);
+                }
+            }
+            
+            // Инициализация эксперимента
+            resetExperiment();
+        });
+    </script>
+</body>
+</html>
